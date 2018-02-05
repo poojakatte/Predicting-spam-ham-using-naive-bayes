@@ -1,0 +1,102 @@
+train_spam<-file.path("hw3_train","train","spam")
+train_ham<-file.path("hw3_train","train","ham")
+test_ham<-file.path("hw3_test","test","ham")
+test_spam<-file.path("hw3_test","test","spam")
+#loading train and test corpus
+library(tm)
+Vtrain_spam<-VCorpus(DirSource(train_spam))
+Vtrain_ham<-VCorpus(DirSource(train_ham))
+Vtest_spam<-VCorpus(DirSource(test_spam))
+Vtest_ham<-VCorpus(DirSource(test_ham))
+#data cleaning-spam train
+Vtrain_spam_clean<-tm_map(Vtrain_spam,content_transformer(tolower))
+Vtrain_spam_clean<-tm_map(Vtrain_spam_clean,removeNumbers)
+Vtrain_spam_clean<-tm_map(Vtrain_spam_clean,removeWords,stopwords())
+Vtrain_spam_clean<-tm_map(Vtrain_spam_clean,removePunctuation)
+library(SnowballC)
+Vtrain_spam_clean<-tm_map(Vtrain_spam_clean,stemDocument)
+Vtrain_spam_clean<-tm_map(Vtrain_spam_clean,stripWhitespace)
+Vtrain_spam_dtm<-DocumentTermMatrix(Vtrain_spam_clean)
+#data cleaning-spam test
+Vtest_spam_clean<-tm_map(Vtest_spam,content_transformer(tolower))
+Vtest_spam_clean<-tm_map(Vtest_spam_clean,removeNumbers)
+Vtest_spam_clean<-tm_map(Vtest_spam_clean,removeWords,stopwords())
+Vtest_spam_clean<-tm_map(Vtest_spam_clean,removePunctuation)
+Vtest_spam_clean<-tm_map(Vtest_spam_clean,stemDocument)
+Vtest_spam_clean<-tm_map(Vtest_spam_clean,stripWhitespace)
+Vtest_spam_dtm<-DocumentTermMatrix(Vtest_spam_clean)
+# data cleaning -ham train
+# Vtrain_ham<-VCorpus(DirSource(train_ham))
+Vtrain_ham_clean<-tm_map(Vtrain_ham,content_transformer(tolower))
+Vtrain_ham_clean<-tm_map(Vtrain_ham_clean,removeNumbers)
+Vtrain_ham_clean<-tm_map(Vtrain_ham_clean,removeWords,stopwords())
+Vtrain_ham_clean<-tm_map(Vtrain_ham_clean,removePunctuation)
+Vtrain_ham_clean<-tm_map(Vtrain_ham_clean,stemDocument)
+Vtrain_ham_clean<-tm_map(Vtrain_ham_clean,stripWhitespace)
+Vtrain_ham_dtm<-DocumentTermMatrix(Vtrain_ham_clean)
+#data cleaning -ham test
+Vtest_ham_clean<-tm_map(Vtest_ham,content_transformer(tolower))
+Vtest_ham_clean<-tm_map(Vtest_ham_clean,removeNumbers)
+Vtest_ham_clean<-tm_map(Vtest_ham_clean,removeWords,stopwords())
+Vtest_ham_clean<-tm_map(Vtest_ham_clean,removePunctuation)
+Vtest_ham_clean<-tm_map(Vtest_ham_clean,stemDocument)
+Vtest_ham_clean<-tm_map(Vtest_ham_clean,stripWhitespace)
+Vtest_ham_dtm<-DocumentTermMatrix(Vtest_ham_clean)
+#preparing labels
+print(Vtrain_spam_clean)
+print(Vtrain_ham_clean)
+print(Vtest_spam_clean)
+print(Vtest_ham_clean)
+
+h_train_labels<-rep("ham",340)
+s_train_labels<-rep("spam",123)
+h_test_labels<-rep("ham",348)
+s_test_labels<-rep("spam",130)
+#combine labels for spam and ham
+train_type<-c(s_train_labels,h_train_labels)
+train_type<-factor(train_type)
+test_type<-c(s_test_labels,h_test_labels)
+test_type<-factor(test_type)
+#combine spam ham train data
+train_data_dtm<-c(Vtrain_spam_dtm,Vtrain_ham_dtm)
+#combine spam ham test
+test_data_dtm<-c(Vtest_spam_dtm,Vtest_ham_dtm)
+#frequent words generation from train
+freq_words<-findFreqTerms(train_data_dtm,30)
+#getting only the frequent words from the dtm
+train_freq_dtm<-train_data_dtm[,freq_words]
+test_freq_dtm<-test_data_dtm[,freq_words]
+#Function that changes numeric 0 to categorial value "No" and numeric >0 to categorial value "Yes"
+convert_counts<-function(x){x<-ifelse(x>0,"Yes","No")}
+train_data<-apply(train_freq_dtm,MARGIN=2,convert_counts)
+test_data<-apply(test_freq_dtm,MARGIN=2,convert_counts)
+#using naiveBayes classifier to classify spam and ham without laplace
+library(e1071)
+nb_classifier<-naiveBayes(train_data,train_type)
+library(gmodels)
+test_predict<-predict(nb_classifier,test_data)
+#To compare prediction to the real values
+CrossTable(test_predict,test_type,prop.chisq=FALSE,prop.t=FALSE,dnn=c('predicted','actual'))
+#using naiveBayes classifier to classify spam and ham with laplace
+nb_classifier2<-naiveBayes(train_data,train_type,laplace=1)
+test_predict<-predict(nb_classifier2,test_data)
+#To compare prediction to the real values
+CrossTable(test_predict,test_type,prop.chisq=FALSE,prop.t=FALSE,dnn=c('predicted','actual'))
+#generating worldclouds for train spam nd ham
+#library(wordcloud)
+wordcloud(Vtrain_spam_clean,max.words=40,scale=c(3,0.5))
+wordcloud(Vtrain_ham_clean,max.words=40,scale=c(3,0.5))
+
+
+
+
+
+
+
+
+
+
+
+
+
+

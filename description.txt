@@ -1,0 +1,37 @@
+PART A: STEPS
+1. Make a vcorpus of trainspam,trainham,testspam,testham
+2. Clean the above data created as:
+	I. convert to lower
+	II. remove numbers, 
+	III. remove Stopwords
+	IV. remove punctuation
+	V. reduce the words to their root form using stemmimg
+	VI. remove whitespaces
+3.Generate a DTM of the cleaned trainspam,trainham,testspam,testham
+4.Prepare labels for training data in factor form for both spam and ham in concatenated form
+5.Prepare labels for test data in factor form for both spam and ham in concatenated form
+6.Concatenate train data of spam and ham
+7.Concatenate test data of spam and ham
+8.Generate frequesnt words from train data
+9.Get only the frequent from dtm
+10.Change numeric values of the sparse matix DTM generated to No if value is 0 else change to  Yes
+11.Train the train data on naivebayes classifier and generate a precidtion for test data
+12. Generate a Crosstable to compare test precited with the real values
+
+PART B:Wordcloud:
+Spam messages worldcloud includes words like http, softwar,intern,get,money,www,email which cannot be found in ham cloud. 
+The ham cloud consists of words like ect,thank,know,enron,hou,gas,chang which cannot be seen in the spam cloud. These world cloud of
+spam and ham tell us that, it will be easy for  Naive bayes model to classy messages as spam and ham due to these different words which can
+be seen in the two clouds.
+
+PART C:Evaluation of the performance of the classifier
+From the crosstable generated without using laplace , we see that out of 478 messages 42(39+3) are incorrectly classified (8.7 percent)
+These includes 39 from 348 ham messages that where incorrectly identified as spam messages and  3 out of 130 spam messages where 
+incorrectly labeled as ham messages.
+From the crosstable generated using laplace as 1 , we see that out of 478 messages 49(48+1) are incorrectly classified (10 percent)
+These includes 48 from 348 ham messages that where incorrectly identified as spam messages and  1 out of 130 spam messages where 
+incorrectly labeled as ham messages. henece we can see that with laplace estimator 1 the number of false negatives(spam messages incorrectly classified as ham)
+increased from 39 to 48 and false positives(ham messages incorrectly classified as spam) decreased from 3 to 1.
+Although using laplace we get less messages incorrectly classified as spam but a high increase in ham messages incorrectly classified as spam
+,speaking from users presective, a user would prefer to have small number of spam messages received rather than the more number of ham messages being 
+filtered out as spam message
